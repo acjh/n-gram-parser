@@ -10,37 +10,45 @@ class WelcomeController < ApplicationController
   end
 
   def transform
-    input = params[:input].split(" ")
-    output = []
+    $input = "This is New York".chomp.split(" ")
+    $output = []
 
-    database = {
+    $database = {
     	"This" => ["That", "This", "Those"],
+    	"is" => ["is"],
     	"New" => ["New", "New York"],
     	"York" => ["York"]
     }
 
-    i = 0
-    phrase = ""
+    $i = 0
+    $phrase = ""
 
-    while i < input.length
-    	phrase += input[i]
-       	output.push(String.new(phrase))
+    def compare(entry, phrase)
+    	casecmp = entry.casecmp(phrase)
+    	if casecmp == 0
+    		$output.pop
+    		$output.push(String.new(phrase))
+    	elsif casecmp == 1
+    		phrase.clear
+    	end
+    	casecmp
+    end
 
-       	entries = database[phrase]
+    while $i < $input.length
+    	$phrase += $input[$i]
+       	$output.push(String.new($phrase))
+
+       	entries = $database[$phrase]
        	if entries
        		entries = [entries].flatten
     	   	entries.each do |entry|
-    			if entry.casecmp(phrase) == 0
-    				output.pop
-    				output.push(String.new(phrase))
-    			elsif entry.casecmp(phrase) == 1
-    				phrase.clear
+    			if compare(entry, $phrase) == 1
     				break
     			end
     		end
     	end
-    	phrase.clear
-    	i += 1
+    	$phrase.clear
+    	$i += 1
     end
 
     @output = output
