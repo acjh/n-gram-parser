@@ -15,6 +15,18 @@ class WelcomeController < ApplicationController
     render :index
   end
 
+  def get_ngrams_starting_with(word)
+    require 'activerecord-jdbcpostgresql-adapter'
+    conn = PGConn.open(:dbname => 'ngrams')
+    conn.prepare('statement', 'SELECT id, w1, w2, w3, w4, v FROM ngrams_table WHERE w1 = $1')
+    res = conn.exec_prepared('statement', [word])
+    ngrams = []
+    res.each do |row|
+      ngrams += Ngram.new(row['id'], row['w1'], row['w2'], row['w3'], row['w4'], row['v'])
+    end
+    ngrams
+  end
+
   def transform_tests()
     puts "Running tests..."
     puts transform_helper("A B C D E")     == ["Y1", "X3", "X4", "X5"]
@@ -47,29 +59,6 @@ class WelcomeController < ApplicationController
   		$w_index < @w.length
   	end
   end
-
-  $database = {
-=begin
-  	1    A                   X1
-  	2    B                   X2
-  	3    A    B              Y1
-  	4    C                   X3
-  	5    D                   X4
-  	6    B    C    D         Y2
-  	7    C    D    F         Y3
-  	8    C    D    G         Y4
-  	9    E                   X5
-=end
-  	"A" => [Ngram.new(1, "A",           "X1"),
-  			    Ngram.new(3, "A", "B",      "Y1")],
-  	"B" => [Ngram.new(2, "B",           "X2"),
-  			    Ngram.new(6, "B", "C", "D", "Y2")],
-  	"C" => [Ngram.new(4, "C",           "X3"),
-  			    Ngram.new(7, "C", "D", "F", "Y3"),
-  			    Ngram.new(8, "C", "D", "G", "Y4")],
-  	"D" => [Ngram.new(5, "D",           "X4")],
-  	"E" => [Ngram.new(9, "E",           "X5")]
-  }
 
   def transform_helper(input)
     $input = input
@@ -131,7 +120,7 @@ class WelcomeController < ApplicationController
   	while has_more_input
   		front_token = peek_input_token
      	$output.push(copy_of(front_token))
-     	$entries = $database[front_token]
+     	$entries = get_ngrams_starting_with(front_token)
      	if !has_entries
   			discard_peeked_token
   		else
