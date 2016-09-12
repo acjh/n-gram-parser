@@ -15,6 +15,19 @@ class WelcomeController < ApplicationController
     render :index
   end
 
+  def transform_tests()
+    puts "Running tests..."
+    puts transform_helper("A B C D E")     == ["Y1", "X3", "X4", "X5"]
+    puts transform_helper("A B C D F")     == ["Y1", "Y3"]
+    puts transform_helper("A B C D E F G") == ["Y1", "X3", "X4", "X5", "F", "G"]
+    puts transform_helper("B C D E F G")   == ["Y2", "X5", "F", "G"]
+    puts transform_helper("C D E F G")     == ["X3", "X4", "X5", "F", "G"]
+    puts transform_helper("C D F G")       == ["Y3", "G"]
+    puts transform_helper("C D G")         == ["Y4"]
+    puts transform_helper("C D G A")       == ["Y4", "X1"]
+    puts transform_helper("C D G A B")     == ["Y4", "Y1"]
+    puts transform_helper("C D F A B")     == ["Y3", "Y1"]
+  end
 
   class Ngram
   	attr_reader :v
