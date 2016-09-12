@@ -46,29 +46,15 @@ class WelcomeController < ApplicationController
     $i = 0
     $phrase = ""
 
-    def compare(ngram, phrase)
+    def compare_loop(ngram, phrase)
     	entry = ngram.string
-    	casecmp = entry.casecmp(phrase)
+    	cmp = entry.casecmp(phrase)
 
-    	if casecmp == 0 # Matches fully
+    	if cmp == 0 # Matches fully
     		$output.pop
     		$output.push(String.new(ngram.v))
 
     	elsif ngram.string.downcase.start_with?($phrase.downcase) # Matches front
-    		casecmp = -2
-
-    	elsif casecmp == 1 # No more matches
-        $inputNum -= 1
-    		$phrase.clear
-    	end
-    	casecmp
-    end
-
-    def compare_loop(ngram, phrase)
-    	cmp = compare(ngram, $phrase)
-    	if cmp == 0
-
-    	elsif cmp == -2
     		$inputNum += 1
     		if $inputNum < $input.length
     			$phrase += $input[$inputNum]
@@ -76,6 +62,11 @@ class WelcomeController < ApplicationController
     		else
     			cmp = 1
     		end
+    	end
+
+    	if cmp == 1 # No more matches
+    		$inputNum -= 1
+    		$phrase.clear
     	end
     	cmp
     end
