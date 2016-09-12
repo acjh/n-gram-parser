@@ -9,15 +9,35 @@ class WelcomeController < ApplicationController
   def index
   end
 
+  class Ngram
+    def initialize(id, w1, w2="", w3="", w4="", v)
+      @id = id
+      @w1 = w1
+      @w2 = w2
+      @w3 = w3
+      @w4 = w4
+      @v = v
+    end
+
+    def string
+      string = @w1 + @w2 + @w3 + @w4
+    end
+  end
+
   def transform
-    $input = "This is New York".chomp.split(" ")
+    $input = params[:input].chomp.split(" ")
     $output = []
 
     $database = {
-    	"This" => ["That", "This", "Those"],
-    	"is" => ["is"],
-    	"New" => ["New", "New York"],
-    	"York" => ["York"]
+    	"A" => [Ngram.new(1, "A",           "X1"),
+    			    Ngram.new(3, "A",      "B", "Y1")],
+    	"B" => [Ngram.new(2, "B",           "X2"),
+    			    Ngram.new(6, "B", "C", "D", "Y2")],
+    	"C" => [Ngram.new(4, "C",           "X3"),
+    			    Ngram.new(7, "C", "D", "F", "Y3"),
+    			    Ngram.new(8, "C", "D", "G", "Y4")],
+    	"D" => [Ngram.new(5, "D",           "X4")],
+    	"E" => [Ngram.new(9, "E",           "X5")]
     }
 
     $i = 0
@@ -41,7 +61,8 @@ class WelcomeController < ApplicationController
        	entries = $database[$phrase]
        	if entries
        		entries = [entries].flatten
-    	   	entries.each do |entry|
+    	   	entries.each do |ngram|
+    	   		entry = ngram.string
     			if compare(entry, $phrase) == 1
     				break
     			end
@@ -51,8 +72,7 @@ class WelcomeController < ApplicationController
     	$i += 1
     end
 
-    @output = output
+    @output = $output
     render :index
   end
-
 end
