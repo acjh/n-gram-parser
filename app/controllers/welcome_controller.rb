@@ -10,6 +10,8 @@ class WelcomeController < ApplicationController
   end
 
   class Ngram
+    attr_reader :v
+
     def initialize(id, w1, w2="", w3="", w4="", v)
       @id = id
       @w1 = w1
@@ -43,13 +45,14 @@ class WelcomeController < ApplicationController
     $i = 0
     $phrase = ""
 
-    def compare(entry, phrase)
+    def compare(ngram, phrase)
+    	entry = ngram.string
     	casecmp = entry.casecmp(phrase)
     	if casecmp == 0
     		$output.pop
-    		$output.push(String.new(phrase))
+    		$output.push(String.new(ngram.v))
     	elsif casecmp == 1
-    		phrase.clear
+    		$phrase.clear
     	end
     	casecmp
     end
@@ -62,14 +65,19 @@ class WelcomeController < ApplicationController
        	if entries
        		entries = [entries].flatten
     	   	entries.each do |ngram|
-    	   		entry = ngram.string
-    			if compare(entry, $phrase) == 1
+    	   		if compare(ngram, $phrase) == 0
+    	   			$i += 1
+    	   			if $i + 1 < $input.length
+    	   				$phrase += $input[$i]
+    	   			else
+    	   				break
+    	   			end
+    	   		elsif compare(ngram, $phrase) == 1
     				break
     			end
     		end
     	end
     	$phrase.clear
-    	$i += 1
     end
 
     @output = $output
