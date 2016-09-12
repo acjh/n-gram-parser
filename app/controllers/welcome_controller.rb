@@ -27,7 +27,7 @@ class WelcomeController < ApplicationController
   end
 
   def transform
-    # Works for "B C D E"
+    # Works for "A B C D F"
     $input = params[:input].chomp.split(" ")
     $output = []
 
@@ -49,12 +49,16 @@ class WelcomeController < ApplicationController
     def compare(ngram, phrase)
     	entry = ngram.string
     	casecmp = entry.casecmp(phrase)
-    	if casecmp == 0
+
+    	if casecmp == 0 # Matches fully
     		$output.pop
     		$output.push(String.new(ngram.v))
-    	elsif ngram.string.downcase.start_with?($phrase.downcase)
-    		casecmp = -1
-    	elsif casecmp == 1
+
+    	elsif ngram.string.downcase.start_with?($phrase.downcase) # Matches front
+    		casecmp = -2
+
+    	elsif casecmp == 1 # No more matches
+        $inputNum -= 1
     		$phrase.clear
     	end
     	casecmp
@@ -63,16 +67,11 @@ class WelcomeController < ApplicationController
     def compare_loop(ngram, phrase)
     	cmp = compare(ngram, $phrase)
     	if cmp == 0
-    		$i += 1
-    		if $i + 1 < $input.length
-    			$phrase += $input[$i]
-    		else
-    			cmp = 1
-    		end
-    	elsif cmp == -1
-    		$i += 1
-    		if $i + 1 < $input.length
-    			$phrase += $input[$i]
+
+    	elsif cmp == -2
+    		$inputNum += 1
+    		if $inputNum < $input.length
+    			$phrase += $input[$inputNum]
     			cmp = compare_loop(ngram, $phrase)
     		else
     			cmp = 1
@@ -81,17 +80,27 @@ class WelcomeController < ApplicationController
     	cmp
     end
 
-    while $i < $input.length
-    	$phrase += $input[$i]
+    while $inputNum < $input.length
+    	$phrase += $input[$inputNum]
        	$output.push(String.new($phrase))
 
        	entries = $database[$phrase]
        	if entries
        		entries = [entries].flatten
-    	   	entries.each do |ngram|
-    	   		if compare_loop(ngram, $phrase) == 1
+       		entryNum = 0
+    	   	until entryNum == entries.size do
+    	   		ngram = entries[entryNum]
+    	   		cmp = compare_loop(ngram, $phrase)
+    	   		if cmp == 0 # Matches current entry && has more
+    	   			$inputNum += 1
+    				if $inputNum < $input.length
+    					$phrase += $input[$inputNum]
+    				end
+    	   		elsif cmp == 1
+    	   			$inputNum += 1
     	   			break
     	   		end
+    	   		entryNum += 1
     		end
     	end
     	$phrase.clear
