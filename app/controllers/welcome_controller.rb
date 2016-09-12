@@ -50,11 +50,7 @@ class WelcomeController < ApplicationController
     	entry = ngram.string
     	cmp = entry.casecmp(phrase)
 
-    	if cmp == 0 # Matches fully
-    		$output.pop
-    		$output.push(String.new(ngram.v))
-
-    	elsif ngram.string.downcase.start_with?($phrase.downcase) # Matches front
+    	if cmp != 0 && ngram.string.downcase.start_with?($phrase.downcase) # Matches front
     		$inputNum += 1
     		if $inputNum < $input.length
     			$phrase += $input[$inputNum]
@@ -62,11 +58,6 @@ class WelcomeController < ApplicationController
     		else
     			cmp = 1
     		end
-    	end
-
-    	if cmp == 1 # No more matches
-    		$inputNum -= 1
-    		$phrase.clear
     	end
     	cmp
     end
@@ -82,17 +73,23 @@ class WelcomeController < ApplicationController
     	   	until entryNum == entries.size do
     	   		ngram = entries[entryNum]
     	   		cmp = compare_loop(ngram, $phrase)
-    	   		if cmp == 0 # Matches current entry && has more
+    	   		if cmp == 0 # Matches current entry
+    	   			$output.pop
+    				$output.push(String.new(ngram.v))
     	   			$inputNum += 1
     				if $inputNum < $input.length
     					$phrase += $input[$inputNum]
     				end
+    	   		elsif cmp == 1 && entryNum < entries.size
+    	   			$inputNum -= 1
+    	   			$phrase.clear
     	   		elsif cmp == 1
-    	   			$inputNum += 1
-    	   			break
+    	   			$phrase.clear
     	   		end
     	   		entryNum += 1
     		end
+    	else
+    		$inputNum += 1
     	end
     	$phrase.clear
     end
