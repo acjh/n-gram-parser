@@ -27,6 +27,7 @@ class WelcomeController < ApplicationController
   end
 
   def transform
+    # Works for "B C D E"
     $input = params[:input].chomp.split(" ")
     $output = []
 
@@ -51,10 +52,33 @@ class WelcomeController < ApplicationController
     	if casecmp == 0
     		$output.pop
     		$output.push(String.new(ngram.v))
+    	elsif ngram.string.downcase.start_with?($phrase.downcase)
+    		casecmp = -1
     	elsif casecmp == 1
     		$phrase.clear
     	end
     	casecmp
+    end
+
+    def compare_loop(ngram, phrase)
+    	cmp = compare(ngram, $phrase)
+    	if cmp == 0
+    		$i += 1
+    		if $i + 1 < $input.length
+    			$phrase += $input[$i]
+    		else
+    			cmp = 1
+    		end
+    	elsif cmp == -1
+    		$i += 1
+    		if $i + 1 < $input.length
+    			$phrase += $input[$i]
+    			cmp = compare_loop(ngram, $phrase)
+    		else
+    			cmp = 1
+    		end
+    	end
+    	cmp
     end
 
     while $i < $input.length
@@ -65,16 +89,9 @@ class WelcomeController < ApplicationController
        	if entries
        		entries = [entries].flatten
     	   	entries.each do |ngram|
-    	   		if compare(ngram, $phrase) == 0
-    	   			$i += 1
-    	   			if $i + 1 < $input.length
-    	   				$phrase += $input[$i]
-    	   			else
-    	   				break
-    	   			end
-    	   		elsif compare(ngram, $phrase) == 1
-    				break
-    			end
+    	   		if compare_loop(ngram, $phrase) == 1
+    	   			break
+    	   		end
     		end
     	end
     	$phrase.clear
