@@ -43,53 +43,75 @@ class WelcomeController < ApplicationController
     	"E" => [Ngram.new(9, "E",           "X5")]
     }
 
-    $i = 0
+    $input_num = 0
+    $hold_count = 0
     $phrase = ""
 
-    def compare_loop(ngram, phrase)
-    	entry = ngram.string
-    	cmp = entry.casecmp(phrase)
-
-    	if cmp != 0 && ngram.string.downcase.start_with?($phrase.downcase) # Matches front
-    		$inputNum += 1
-    		if $inputNum < $input.length
-    			$phrase += $input[$inputNum]
-    			cmp = compare_loop(ngram, $phrase)
-    		else
-    			cmp = 1
-    		end
-    	end
-    	cmp
+    def matches(cmp)
+    	cmp == 0
     end
 
-    while $inputNum < $input.length
-    	$phrase += $input[$inputNum]
-       	$output.push(String.new($phrase))
+    def matches_front_only(cmp, ngram, phrase)
+    	!matches(cmp) && ngram.string.start_with?(phrase)
+    end
 
+    def does_not_match(cmp)
+    	cmp == 1
+    end
+
+    def has_more_words()
+    	$input_num += 1
+    	$input_num < $input.length
+    end
+
+    def next_word()
+    	$input[$input_num]
+    end
+
+    def step_back_words()
+    	$input_num -= 1 + $hold_count
+    	$hold_count = 0
+    end
+
+    def compare(ngram, phrase)
+    	cmp = ngram.string.casecmp(phrase)
+    	puts "#{ngram.string} == #{phrase} : #{cmp}"
+
+    	if matches(cmp)
+    		$hold_count = -1
+    		$output.pop
+    		$output.push(copy_of(ngram.v))
+    		if has_more_words
+    			$phrase += next_word
+    		end
+
+    	elsif matches_front_only(cmp, ngram, phrase)
+    		if has_more_words
+    			$hold_count += 1
+    			$phrase += next_word
+    			compare(ngram, $phrase)
+    		end
+
+    	elsif does_not_match(cmp)
+    		step_back_words
+    	   	$phrase.clear
+    	end
+    end
+
+    def copy_of(string)
+    	String.new(string)
+    end
+
+    while $input_num < $input.length
+    	$phrase += $input[$input_num]
+       	$output.push(copy_of($phrase))
        	entries = $database[$phrase]
        	if entries
-       		entries = [entries].flatten
-       		entryNum = 0
-    	   	until entryNum == entries.size do
-    	   		ngram = entries[entryNum]
-    	   		cmp = compare_loop(ngram, $phrase)
-    	   		if cmp == 0 # Matches current entry
-    	   			$output.pop
-    				$output.push(String.new(ngram.v))
-    	   			$inputNum += 1
-    				if $inputNum < $input.length
-    					$phrase += $input[$inputNum]
-    				end
-    	   		elsif cmp == 1 && entryNum < entries.size
-    	   			$inputNum -= 1
-    	   			$phrase.clear
-    	   		elsif cmp == 1
-    	   			$phrase.clear
-    	   		end
-    	   		entryNum += 1
+       		[entries].flatten.each do |ngram|
+    	   		compare(ngram, $phrase)
     		end
     	else
-    		$inputNum += 1
+    		$input_num += 1
     	end
     	$phrase.clear
     end
