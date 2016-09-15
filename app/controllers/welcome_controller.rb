@@ -10,19 +10,47 @@ class WelcomeController < ApplicationController
   end
 
   def transform
+    if $database_needs_initialize
+      initialize_database
+      $database_needs_initialize = false
+    end
     input = params[:input].chomp.split(" ")
     @output = transform_helper(input)
     render :index
   end
 
+  $database_needs_initialize = true
+
+  def getConnection()
+    url = "jdbc:postgresql://localhost/ngram-parser_development"
+    conn = java::sql::DriverManager.getConnection(url, 'postgres', 'postgres')
+  end
+
+  def initialize_database()
+    conn = getConnection()
+
+    drop_table = "DROP TABLE IF EXISTS ngrams;"
+    conn.create_statement.execute_update(drop_table)
+
+    create_table = "CREATE TABLE ngrams (id INT NOT NULL, w1 CHAR(1) NOT NULL, w2 CHAR(1), w3 CHAR(1), w4 CHAR(1), v CHAR(2), PRIMARY KEY (id));"
+    conn.create_statement.execute_update(create_table)
+
+    insert_values = "INSERT INTO ngrams VALUES (1, 'A', DEFAULT, DEFAULT, DEFAULT, 'X1'), (2, 'B', DEFAULT, DEFAULT, DEFAULT, 'X2'), (3, 'A', 'B', DEFAULT, DEFAULT, 'Y1'), (4, 'C', DEFAULT, DEFAULT, DEFAULT, 'X3'), (5, 'D', DEFAULT, DEFAULT, DEFAULT, 'X4'), (6, 'B', 'C', 'D', DEFAULT, 'Y2'), (7, 'C', 'D', 'F', DEFAULT, 'Y3'), (8, 'C', 'D', 'G', DEFAULT, 'Y4'), (9, 'E', DEFAULT, DEFAULT, DEFAULT, 'X5');"
+    conn.create_statement.execute_update(insert_values)
+  end
+
   def get_ngrams_starting_with(word)
-    require 'activerecord-jdbcpostgresql-adapter'
-    conn = PGConn.open(:dbname => 'ngrams')
-    conn.prepare('statement', 'SELECT id, w1, w2, w3, w4, v FROM ngrams_table WHERE w1 = $1')
-    res = conn.exec_prepared('statement', [word])
+    query = "SELECT id, w1, w2, w3, w4, v FROM ngrams WHERE w1 = '" + word + "';"
+    result = getConnection.create_statement.execute_query(query)
+
     ngrams = []
-    res.each do |row|
-      ngrams += Ngram.new(row['id'], row['w1'], row['w2'], row['w3'], row['w4'], row['v'])
+    while result.next
+      ngrams.push(Ngram.new(result.getInt('id'),
+                            result.getString('w1'),
+                            result.getString('w2'),
+                            result.getString('w3'),
+                            result.getString('w4'),
+                            result.getString('v')))
     end
     ngrams
   end
@@ -109,7 +137,7 @@ class WelcomeController < ApplicationController
   	end
 
   	def compare(str1, str2)
-  		str1.casecmp(str2)
+        str1 ? str1.casecmp(str2) : -1
   	end
 
   	def roll_back()

@@ -16,4 +16,12 @@ ActiveRecord::Schema.define(version: 0) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
+  create_table "ngrams", force: :cascade do |t|
+    t.string "w1", limit: 1, null: false
+    t.string "w2", limit: 1
+    t.string "w3", limit: 1
+    t.string "w4", limit: 1
+    t.string "v",  limit: 2
+  end
+
 end
