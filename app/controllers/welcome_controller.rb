@@ -9,17 +9,17 @@ class WelcomeController < ApplicationController
   def index
   end
 
+  @database_needs_initialize = true
+
   def transform
-    if $database_needs_initialize
+    if @database_needs_initialize
       initialize_database
-      $database_needs_initialize = false
+      @database_needs_initialize = false
     end
     input = params[:input].chomp
     @output = transform_helper(input)
     render :index
   end
-
-  $database_needs_initialize = true
 
   def getConnection()
     url = "jdbc:postgresql://localhost/ngram-parser_development"
