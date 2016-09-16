@@ -25,7 +25,7 @@ class WelcomeController < ApplicationController
     # url = "jdbc:postgresql://localhost/ngram-parser_development"
     # conn = java::sql::DriverManager.getConnection(url, 'postgres', 'postgres')
     url = java::lang::System.getenv("DATABASE_URL")
-    conn = java::sql::DriverManager.getConnection(url)
+    conn = java::sql::DriverManager.getConnection("jdbc:" + url)
 
   end
 
