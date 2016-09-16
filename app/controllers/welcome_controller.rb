@@ -51,7 +51,7 @@ class WelcomeController < ApplicationController
 
   def get_ngrams_starting_with(word)
     conn = getConnection
-    query = 'SELECT id, w1, w2, w3, w4, v FROM ngrams WHERE w1 = "#{word}";'
+    query = 'SELECT id, w1, w2, w3, w4, v FROM "ngrams" WHERE w1 = "#{word}";'
     result = conn.create_statement.execute_query(query)
     conn.close
 
