@@ -182,7 +182,8 @@ class WelcomeController < ApplicationController
      				end
      			end
      			if $hold.any?
-     				$w_index -= 1 # Check same word for next entry
+     				$w_index = 0 # Check from start for next entry, not just wrong word
+     				roll_back    # Otherwise "C D G" will fail "C D F" and pass "C E G"
      			end
      		end
     	end
