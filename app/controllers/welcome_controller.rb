@@ -27,7 +27,7 @@ class WelcomeController < ApplicationController
   end
 
   def initialize_database()
-    conn = getConnection()
+    conn = getConnection
 
     drop_table = "DROP TABLE IF EXISTS ngrams;"
     conn.create_statement.execute_update(drop_table)
@@ -166,7 +166,7 @@ class WelcomeController < ApplicationController
      				current_token = peek_input_token
      				word = ngram.next_word
      				compare_value = compare(word, current_token)
-     				if compare_value == 0 	# Entry.word == input.word
+     				if compare_value == 0 # Entry.word == input.word
      					discard_peeked_token
      					if ngram.has_more_words
      						$hold.push(copy_of(current_token))
