@@ -14,7 +14,7 @@ class WelcomeController < ApplicationController
       initialize_database
       $database_needs_initialize = false
     end
-    input = params[:input].chomp.split(" ")
+    input = params[:input].chomp
     @output = transform_helper(input)
     render :index
   end
@@ -37,11 +37,15 @@ class WelcomeController < ApplicationController
 
     insert_values = "INSERT INTO ngrams VALUES (1, 'A', DEFAULT, DEFAULT, DEFAULT, 'X1'), (2, 'B', DEFAULT, DEFAULT, DEFAULT, 'X2'), (3, 'A', 'B', DEFAULT, DEFAULT, 'Y1'), (4, 'C', DEFAULT, DEFAULT, DEFAULT, 'X3'), (5, 'D', DEFAULT, DEFAULT, DEFAULT, 'X4'), (6, 'B', 'C', 'D', DEFAULT, 'Y2'), (7, 'C', 'D', 'F', DEFAULT, 'Y3'), (8, 'C', 'D', 'G', DEFAULT, 'Y4'), (9, 'E', DEFAULT, DEFAULT, DEFAULT, 'X5');"
     conn.create_statement.execute_update(insert_values)
+
+    conn.close
   end
 
   def get_ngrams_starting_with(word)
-    query = "SELECT id, w1, w2, w3, w4, v FROM ngrams WHERE w1 = '" + word + "';"
-    result = getConnection.create_statement.execute_query(query)
+    conn = getConnection
+    query = "SELECT id, w1, w2, w3, w4, v FROM ngrams WHERE w1 = '#{word}';"
+    result = conn.create_statement.execute_query(query)
+    conn.close
 
     ngrams = []
     while result.next
@@ -74,7 +78,7 @@ class WelcomeController < ApplicationController
 
     def initialize(id, w1, *w, v)
     	@id = id
-  	  @w = [w1] + w
+  	  @w = ([w1] + w).compact
     	@v = v
     end
 
@@ -89,7 +93,7 @@ class WelcomeController < ApplicationController
   end
 
   def transform_helper(input)
-    $input = input
+    $input = input.split(" ")
   	$output = []
   	$entries = []
   	$hold = []
