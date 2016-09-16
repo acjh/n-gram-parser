@@ -135,12 +135,13 @@ class WelcomeController < ApplicationController
   	end
 
   	def has_entries()
-  		if $entries
-  			$entries = [$entries].flatten
+  		has_entries = false
+  		if $entries.any?
+  			has_entries = true
   			$entry_num = 0
   			$w_index = 0
   		end
-  		$entries
+  		has_entries
   	end
 
   	def compare(str1, str2)
