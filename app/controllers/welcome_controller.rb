@@ -36,13 +36,13 @@ class WelcomeController < ApplicationController
   def initialize_database()
     conn = getConnection
 
-    drop_table = "DROP TABLE IF EXISTS ngrams;"
+    drop_table = 'DROP TABLE IF EXISTS "ngrams";'
     conn.create_statement.execute_update(drop_table)
 
-    create_table = "CREATE TABLE ngrams (id INT NOT NULL, w1 CHAR(1) NOT NULL, w2 CHAR(1), w3 CHAR(1), w4 CHAR(1), v CHAR(2), PRIMARY KEY (id));"
+    create_table = 'CREATE TABLE "ngrams" (id INT NOT NULL, w1 CHAR(1) NOT NULL, w2 CHAR(1), w3 CHAR(1), w4 CHAR(1), v CHAR(2), PRIMARY KEY (id));'
     conn.create_statement.execute_update(create_table)
 
-    insert_values = "INSERT INTO ngrams VALUES (1, 'A', DEFAULT, DEFAULT, DEFAULT, 'X1'), (2, 'B', DEFAULT, DEFAULT, DEFAULT, 'X2'), (3, 'A', 'B', DEFAULT, DEFAULT, 'Y1'), (4, 'C', DEFAULT, DEFAULT, DEFAULT, 'X3'), (5, 'D', DEFAULT, DEFAULT, DEFAULT, 'X4'), (6, 'B', 'C', 'D', DEFAULT, 'Y2'), (7, 'C', 'D', 'F', DEFAULT, 'Y3'), (8, 'C', 'D', 'G', DEFAULT, 'Y4'), (9, 'E', DEFAULT, DEFAULT, DEFAULT, 'X5');"
+    insert_values = "INSERT INTO \"ngrams\" VALUES (1, 'A', DEFAULT, DEFAULT, DEFAULT, 'X1'), (2, 'B', DEFAULT, DEFAULT, DEFAULT, 'X2'), (3, 'A', 'B', DEFAULT, DEFAULT, 'Y1'), (4, 'C', DEFAULT, DEFAULT, DEFAULT, 'X3'), (5, 'D', DEFAULT, DEFAULT, DEFAULT, 'X4'), (6, 'B', 'C', 'D', DEFAULT, 'Y2'), (7, 'C', 'D', 'F', DEFAULT, 'Y3'), (8, 'C', 'D', 'G', DEFAULT, 'Y4'), (9, 'E', DEFAULT, DEFAULT, DEFAULT, 'X5');"
     conn.create_statement.execute_update(insert_values)
 
     conn.close
