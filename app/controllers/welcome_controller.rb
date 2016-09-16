@@ -28,7 +28,7 @@ class WelcomeController < ApplicationController
     dbUri = URI(url)
     username = dbUri.userinfo.split(":")[0]
     password = dbUri.userinfo.split(":")[1]
-    dbUrl = "jdbc:postgresql://" + dbUri.host + ':' + dbUri.port + dbUri.path
+    dbUrl = "jdbc:postgresql://" + dbUri.host + ':' + dbUri.port.to_s + dbUri.path
     conn = java::sql::DriverManager.getConnection(dbUrl, username, password)
 
   end
