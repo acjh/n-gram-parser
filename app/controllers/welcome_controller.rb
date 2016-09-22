@@ -133,7 +133,7 @@ class WelcomeController < ApplicationController
   	end
 
   	def compare(str1, str2)
-  		str1.casecmp(str2)
+        str1 ? str1.casecmp(str2) : -1
   	end
 
   	def roll_back()
