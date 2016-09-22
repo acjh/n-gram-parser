@@ -84,7 +84,7 @@ class WelcomeController < ApplicationController
   }
 
   def transform_helper(input)
-    $input = input
+    $input = input.split(" ")
   	$output = []
   	$entries = []
   	$hold = []
