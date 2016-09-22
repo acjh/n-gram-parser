@@ -46,7 +46,7 @@ class WelcomeController < ApplicationController
 
     def initialize(id, w1, *w, v)
     	@id = id
-  	  @w = [w1] + w
+  	  @w = ([w1] + w).compact
     	@v = v
     end
 
