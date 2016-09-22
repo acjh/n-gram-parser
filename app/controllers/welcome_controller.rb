@@ -15,8 +15,9 @@ class WelcomeController < ApplicationController
     render :index
   end
 
-  def transform_tests()
+  def test_transform()
     puts "Running tests..."
+    puts transform_helper("A B C D")       == ["Y1", "X3", "X4"]
     puts transform_helper("A B C D E")     == ["Y1", "X3", "X4", "X5"]
     puts transform_helper("A B C D F")     == ["Y1", "Y3"]
     puts transform_helper("A B C D E F G") == ["Y1", "X3", "X4", "X5", "F", "G"]
@@ -27,6 +28,7 @@ class WelcomeController < ApplicationController
     puts transform_helper("C D G A")       == ["Y4", "X1"]
     puts transform_helper("C D G A B")     == ["Y4", "Y1"]
     puts transform_helper("C D F A B")     == ["Y3", "Y1"]
+    puts "Tests ended."
   end
 
   class Ngram
